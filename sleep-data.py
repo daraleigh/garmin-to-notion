@@ -12,6 +12,19 @@ local_tz = pytz.timezone("America/Chicago")
 load_dotenv()
 CONFIG = dotenv_values()
 
+def get_all_sleep(garmin):
+    """
+    Get last x days of daily step count data from Garmin Connect.
+    """
+    startdate = date.today() - timedelta(days=10)
+    daterange = [startdate + timedelta(days=x) 
+    daterange = [startdate + timedelta(days=x) 
+                 for x in range((date.today() - startdate).days)] # excl. today
+    all_sleep = []
+    for d in daterange:
+        all_sleep += garmin.get_sleep_data(d.isoformat(), d.isoformat())
+    return all_sleep
+    
 def get_sleep_data(garmin):
     today = datetime.today().date()
     return garmin.get_sleep_data(today.isoformat())
