@@ -18,7 +18,6 @@ def get_all_sleep(garmin):
     """
     startdate = date.today() - timedelta(days=10)
     daterange = [startdate + timedelta(days=x) 
-    daterange = [startdate + timedelta(days=x) 
                  for x in range((date.today() - startdate).days)] # excl. today
     all_sleep = []
     for d in daterange:
