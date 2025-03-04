@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from garminconnect import Garmin
 from notion_client import Client
-from dotenv import load_dotenv, dotenv_values
+from dotenv import load_dotenv
 import pytz
 import os
 
@@ -12,7 +12,7 @@ local_tz = pytz.timezone('America/Chicago')
 # Load Env Variables
 
 load_dotenv()
-CONFIG = dotenv_values()
+
 
 def get_max_metrics(garmin):
     today = datetime.today().date()
