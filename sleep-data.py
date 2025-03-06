@@ -15,7 +15,7 @@ def get_sleep_data(garmin):
                  for x in range((date.today() - startdate).days)] # excl. today
     daily_sleep = []
     for d in daterange:
-        daily_sleep += garmin.get_daily_sleep(d.isoformat(), d.isoformat())
+        daily_sleep += garmin.get_sleep_data(d.isoformat(), d.isoformat())
     return daily_sleep
 
 def sleep_data_exists(client, database_id, sleep_date):
