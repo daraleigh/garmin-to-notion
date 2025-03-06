@@ -6,7 +6,7 @@ import pytz
 import os
 
 # Constants
-local_tz = pytz.timezone("America/New_York")
+local_tz = pytz.timezone("America/Chicago")
 
 # Load environment variables
 load_dotenv()
@@ -14,7 +14,9 @@ CONFIG = dotenv_values()
 
 def get_sleep_data(garmin):
     today = datetime.today().date()
-    return garmin.get_sleep_data(today.isoformat())
+    for i in range(1, 4):
+        previous_date = today - datetime.timedelta(days=i)
+        return garmin.get_sleep_data(previous_date.isoformat())
 
 def format_duration(seconds):
     minutes = (seconds or 0) // 60
