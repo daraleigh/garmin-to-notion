@@ -4,7 +4,9 @@ from notion_client import Client
 from dotenv import load_dotenv
 import os
 
-def daily_sleep(garmin):
+
+    
+def get_sleep_data(garmin):
     """
     Get last x days of daily step count data from Garmin Connect.
     """
