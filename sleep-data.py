@@ -1,9 +1,9 @@
-from datetime import datetime, timedelta
 from garminconnect import Garmin
 from notion_client import Client
 from dotenv import load_dotenv, dotenv_values
 import pytz
 import os
+import datetime
 
 # Constants
 local_tz = pytz.timezone("America/Chicago")
