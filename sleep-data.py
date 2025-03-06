@@ -18,7 +18,8 @@ def get_sleep_data(garmin):
                  for x in range ((date.today() - startdate.days)]
     sleep = []
     for d in daterange:
-        return garmin.get_sleep_data(d.isoformat())
+        sleep += garmin.get_sleep_data(d.isoformat())
+        return sleep
 
 def format_duration(seconds):
     minutes = (seconds or 0) // 60
