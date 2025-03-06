@@ -1,39 +1,20 @@
-from datetime import datetime
+from datetime import date, timedelta
 from garminconnect import Garmin
 from notion_client import Client
-from dotenv import load_dotenv, dotenv_values
-import pytz
+from dotenv import load_dotenv
 import os
 
-# Constants
-local_tz = pytz.timezone("America/Chicago")
-
-# Load environment variables
-load_dotenv()
-CONFIG = dotenv_values()
-    
-def get_sleep_data(garmin):
-    today = datetime.today().date(1)
-    return garmin.get_sleep_data(today.isoformat())
-
-def format_duration(seconds):
-    minutes = (seconds or 0) // 60
-    return f"{minutes // 60}h {minutes % 60}m"
-
-def format_time(timestamp):
-    return (
-        datetime.utcfromtimestamp(timestamp / 1000).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-        if timestamp else None
-    )
-
-def format_time_readable(timestamp):
-    return (
-        datetime.fromtimestamp(timestamp / 1000, local_tz).strftime("%H:%M")
-        if timestamp else "Unknown"
-    )
-
-def format_date_for_name(sleep_date):
-    return datetime.strptime(sleep_date, "%Y-%m-%d").strftime("%d.%m.%Y") if sleep_date else "Unknown"
+def get_all_daily_sleep(garmin):
+    """
+    Get last x days of daily step count data from Garmin Connect.
+    """
+    startdate = date.today() - timedelta(days=100)
+    daterange = [startdate + timedelta(days=x) 
+                 for x in range((date.today() - startdate).days)] # excl. today
+    daily_sleep = []
+    for d in daterange:
+        daily_sleep += garmin.get_daily_sleep(d.isoformat(), d.isoformat())
+    return daily_sleep
 
 def sleep_data_exists(client, database_id, sleep_date):
     query = client.databases.query(
@@ -41,7 +22,7 @@ def sleep_data_exists(client, database_id, sleep_date):
         filter={"property": "Long Date", "date": {"equals": sleep_date}}
     )
     results = query.get('results', [])
-    return results[0] if results else None  # Ensure it returns None instead of causing IndexError
+    return results[0] if results else None
 
 def create_sleep_data(client, database_id, sleep_data, skip_zero_sleep=True):
     daily_sleep = sleep_data.get('dailySleepDTO', {})
@@ -53,11 +34,10 @@ def create_sleep_data(client, database_id, sleep_data, skip_zero_sleep=True):
         (daily_sleep.get(k, 0) or 0) for k in ['deepSleepSeconds', 'lightSleepSeconds', 'remSleepSeconds']
     )
     
-    
     if skip_zero_sleep and total_sleep == 0:
         print(f"Skipping sleep data for {sleep_date} as total sleep is 0")
         return
-
+        
     properties = {
         "Date": {"title": [{"text": {"content": format_date_for_name(sleep_date)}}]},
         "Times": {"rich_text": [{"text": {"content": f"{format_time_readable(daily_sleep.get('sleepStartTimestampGMT'))} → {format_time_readable(daily_sleep.get('sleepEndTimestampGMT'))}"}}]},
@@ -70,7 +50,6 @@ def create_sleep_data(client, database_id, sleep_data, skip_zero_sleep=True):
         "Awake Time": {"rich_text": [{"text": {"content": format_duration(daily_sleep.get('awakeSleepSeconds', 0))}}]},
         "Resting HR": {"number": sleep_data.get('restingHeartRate', 0)}
     }
-    
     client.pages.create(parent={"database_id": database_id}, properties=properties, icon={"emoji": "😴"})
     print(f"Created sleep entry for: {sleep_date}")
 
