@@ -13,7 +13,7 @@ load_dotenv()
 CONFIG = dotenv_values()
     
 def get_sleep_data(garmin):
-    today = datetime.today().date(-1)
+    today = datetime.today().date(1)
     return garmin.get_sleep_data(today.isoformat())
 
 def format_duration(seconds):
