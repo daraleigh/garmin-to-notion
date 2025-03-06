@@ -13,10 +13,12 @@ load_dotenv()
 CONFIG = dotenv_values()
 
 def get_sleep_data(garmin):
-    today = datetime.today().date()
-    for i in range(1, 4):
-        previous_date = today - datetime.timedelta(days=i)
-        return garmin.get_sleep_data(previous_date.isoformat())
+    startdate = datetime.today().date() - timedelta(days=1)
+    daterange = [startdate + timedelta(days=x)
+                 for x in range ((date.today() - startdate.days)]
+    sleep = []
+    for d in daterange:
+        return garmin.get_sleep_data(d.isoformat())
 
 def format_duration(seconds):
     minutes = (seconds or 0) // 60
