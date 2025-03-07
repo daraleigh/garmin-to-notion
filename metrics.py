@@ -23,7 +23,6 @@ def get_max_metrics(garmin):
         metrics += garmin.get_max_metrics(d.isoformat(), d.isoformat())
     return metrics
 
-            },
             "properties":{
                 'date': {'date': {'start': date}},
                 "vo2max": {'number': vo2max},
