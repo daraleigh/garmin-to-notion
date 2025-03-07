@@ -17,7 +17,7 @@ load_dotenv()
 def get_max_metrics(garmin):
     startdate = date.today() - timedelta(days=1)
     daterange = [startdate + timedelta(days=x)
-                for x in range((date.today() = startdate).days)]
+                for x in range((date.today() - startdate).days)]
     metrics = []
     for d in daterange: 
         metrics += garmin.get_max_metrics(d.isoformat(), d.isoformat())
