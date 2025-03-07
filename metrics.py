@@ -13,7 +13,7 @@ local_tz = pytz.timezone('America/Chicago')
 
 load_dotenv()
 
-
+"""
 def get_max_metrics(garmin):
     startdate = date.today() - timedelta(days=1)
     daterange = [startdate + timedelta(days=x)
@@ -61,7 +61,7 @@ def main():
 if __name__ == '__main__':
      main()
 
-
+"""
 
 
 
