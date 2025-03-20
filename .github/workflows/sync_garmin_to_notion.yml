@@ -50,3 +50,4 @@ jobs:
           python personal-records.py
           python daily-steps.py
           python sleep-data.py
+          python metrics.py
