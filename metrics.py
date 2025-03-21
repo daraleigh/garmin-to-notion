@@ -71,9 +71,9 @@ def get_body_battery(client, date=None):
         logger.error(f"Error fetching body battery data: {err}")
         return None
 def write_metrics_to_notion(notion_token, notion_db_id, charged_value, drained_value, timestamp):
-
-    Write body battery metrics to a Notion database.
 """
+    Write body battery metrics to a Notion database.
+
     Args:
         notion_token (str): Notion API token
         notion_db_id (str): Notion database ID
