@@ -1,12 +1,9 @@
-#!/usr/bin/env python3
-"""
-Script to fetch body battery data from Garmin Connect.
-"""
 import datetime
 import json
 import logging
 import os
 import sys
+from notion_client import Client
 from garminconnect import (
     Garmin,
     GarminConnectAuthenticationError,
@@ -14,7 +11,6 @@ from garminconnect import (
     GarminConnectTooManyRequestsError,
 )
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -30,10 +26,8 @@ def authenticate_garmin(email, password):
         Garmin: Authenticated Garmin client object
     """
     try:
-        # Initialize the Garmin client
         client = Garmin(email, password)
         
-        # Login to Garmin Connect
         client.login()
         return client
     
@@ -76,6 +70,59 @@ def get_body_battery(client, date=None):
     ) as err:
         logger.error(f"Error fetching body battery data: {err}")
         return None
+def write_metrics_to_notion(notion_token, notion_db_id, charged_value, drained_value, timestamp):
+
+    Write body battery metrics to a Notion database.
+"""
+    Args:
+        notion_token (str): Notion API token
+        notion_db_id (str): Notion database ID
+        charged_value (float): Body battery charged value
+        drained_value (float): Body battery drained value
+        timestamp (str): Timestamp of the reading
+ """   
+    Returns:
+        bool: True if successful, False otherwise
+  
+    try:
+        notion = Client(auth=notion_token)
+        
+        notion.pages.create(
+            parent={"database_id": notion_db_id},
+            properties={
+                "Body Battery Charged Value": {
+                    "number": charged_value
+                },
+                "Body Battery Drained Value": {
+                    "number": drained_value
+                },
+                "Timestamp": {
+                    "rich_text": [
+                        {
+                            "text": {
+                                "content": timestamp
+                            }
+                        }
+                    ]
+                },
+                "Name": {
+                    "title": [
+                        {
+                            "text": {
+                                "content": f"Body Battery Metrics {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                            }
+                        }
+                    ]
+                }
+            }
+        )
+        
+        logger.info(f"Successfully wrote body battery metrics to Notion")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error writing to Notion: {e}")
+        return False
 
 def main():
     """Main function to execute the script."""
@@ -113,7 +160,28 @@ def main():
                 print(f"Timestamp: {latest.get('timestamp', 'N/A')}")
                 print(f"Battery Level: {latest.get('bodyBatteryValue', 'N/A')}%")
                 print(f"Charged: {latest.get('bodyBatteryChargeValue', 'N/A')}%")
-                print(f"Drained: {latest.get('bodyBatteryDrainValue', 'N/A')}%")
+                print(f\"Drained: {latest.get('bodyBatteryDrainValue', 'N/A')}%\")
+                
+                # Write metrics to Notion if credentials are available
+                if notion_token and notion_db_id:
+                    charged_value = latest.get('bodyBatteryChargeValue', 0)
+                    drained_value = latest.get('bodyBatteryDrainValue', 0)
+                    timestamp = latest.get('timestamp', datetime.datetime.now().isoformat())
+                    
+                    success = write_metrics_to_notion(
+                        notion_token, 
+                        notion_db_id, 
+                        charged_value, 
+                        drained_value, 
+                        timestamp
+                    )
+                    
+                    if success:
+                        print("Successfully wrote metrics to Notion")
+                    else:
+                        print("Failed to write metrics to Notion")
+                else:
+                    logger.warning("Notion credentials not provided. Skipping write to Notion.")
                 
                 # Calculate daily stats
                 if len(body_battery_data) > 0:
@@ -131,4 +199,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
